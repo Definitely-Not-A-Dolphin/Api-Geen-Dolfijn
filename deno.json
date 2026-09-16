@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "dev": "deno run --allow-env --allow-net --allow-read --watch src/index.ts",
+    "prod": "deno run --allow-env --allow-net --allow-read  src/index.ts"
+  },
+  "imports": {
+    "#/": "./",
+    "@kuusi/kuusi": "jsr:@kuusi/kuusi@^1.1.3",
+    "octokit": "npm:octokit@^5.0.5"
+  },
+  "unstable": ["cron"]
+}
