@@ -1,35 +1,34 @@
+import { Repository } from "#src/types.ts";
 import { WebSource } from "@kuusi/kuusi";
-import { Repository } from "#/src/types.ts";
 
 const route = new WebSource({
   async GET(req) {
     const params = new URL(req.url).searchParams;
-    const repoID = params.get("repoID");
-    if (!repoID) {
+    const repoIDs = params.get("repoIDs")?.split(",");
+    if (!repoIDs) {
       return new Response(null, {
         status: 400,
         statusText: "Please supply a repository ID.",
       });
     }
 
+    const returnData: Record<string, Repository | null> = {};
     const db = await Deno.openKv("kv.sqlite3");
-    const getGithubData = await db.get(["githubData", repoID]);
+    const keys = repoIDs.map((repoID) => ["githubData", repoID]);
 
-    if (!getGithubData.versionstamp) {
-      return new Response(null, {
-        status: 500,
-        statusText: "No data found for given repoID.",
-      });
+    const getGithubData = await db.getMany<Repository[]>(keys);
+
+    for (const githubData of getGithubData) {
+      const key = githubData.key[1] as string;
+      returnData[key] = githubData.value;
+
+      console.log(
+        `\x1b[102m > \x1b[0m Returned Data: ${key}`,
+        returnData,
+      );
     }
 
     db.close();
-
-    const returnData = getGithubData.value as Repository;
-
-    console.log(
-      `\x1b[102m > \x1b[0m Returned Data: ${returnData.fullName}`,
-      returnData,
-    );
 
     return new Response(JSON.stringify(returnData), {
       status: 200,

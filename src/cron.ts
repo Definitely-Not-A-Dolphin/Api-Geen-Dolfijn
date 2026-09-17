@@ -1,9 +1,8 @@
+import { GitHubRepository, Languages, Repository } from "#src/types.ts";
 import { Octokit } from "octokit";
-import { GitHubRepository, Languages, Repository } from "#/src/types.ts";
 
-const GITHUB_TOKEN = Deno.env.get("GITHUB_TOKEN")!;
-const octokit = new Octokit({ auth: GITHUB_TOKEN });
-const repoIDs = ["1133847980"];
+const octokit = new Octokit({ auth: Deno.env.get("GITHUB_TOKEN")! });
+const repoIDs = ["1133847980", "971248396", "915271815", "1002157693"];
 
 Deno.cron("Fetch GitHub Data", { hour: { every: 1 } }, async () => {
   const db = await Deno.openKv("kv.sqlite3");
@@ -80,6 +79,7 @@ Deno.cron("Fetch GitHub Data", { hour: { every: 1 } }, async () => {
     );
 
     await db.set(["githubData", repoID], githubData);
-    db.close();
   }
+
+  db.close();
 });
